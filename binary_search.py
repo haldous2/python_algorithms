@@ -14,14 +14,14 @@ print "Memory MB:{:4d}<br/>\n".format(resource.getrusage(resource.RUSAGE_SELF).r
 class binarySearch(object):
 
     """
-    Binary Search
+    Binary Search Class
+
+    Assume: input is list it's in order and has some data.
+    
     split ordered array of integers into 2 parts (binary) until value found
-    O(log n)time, 0(1)data
+    O(log n)time, 0(1)space
 
-    Note: inputs are all ints, assuming array has at least one element
-          this algorithm doesn't check for types or None(Null)
-
-    pseudocode:
+    PseudoCode:
     1. Let min = 0 and max = n-1.
     2. Compute pivot as the average of max and min, rounded down (so that it is an integer).
        don't forget to add min!
