@@ -6,12 +6,15 @@
 
 import random
 import resource
+from collections import deque
 
 # Print necessary headers.
 #print "Content-Type: text/html\n\n"
 
 """
 Binary Tree Search
+
+Big-O Average: O(log(n)) Worst: O(n) Space: O(n)
 
 Adding: will always be a leaf - just follow the trail left or right until a spot is open
 
@@ -28,14 +31,20 @@ Deleting: 3 scenarios will decide how element is removed
 Traversals (for traversing):
 Questions unanswered - are traversals used for finding, inserting and removing too ?
                        or just to display the nodes in said order(s)
- Preorder
-  Root, left, right
 
- Inorder
-  Left, root, right
+Breadth First Search (width, by level horizontally)
 
- Postorder
-  left, right, root
+Depth First Search (depth, dig down vertically)
+  Note: left then right - root moves according to order
+
+     Preorder
+      Root, left, right
+
+     Inorder
+      Left, root, right
+
+     Postorder
+      left, right, root
 
 """
 
@@ -127,6 +136,36 @@ class Node(object):
             if self.right:
                 self.right.postOrder()
             print (str(self.value))
+
+class Stack(object):
+
+    # Stack class - abstract data type; an abstract data type with physical structure
+    # Break it down: a list with methods that act like a stack
+
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def push(self, item):
+        self.items.append(item)
+
+    def pop(self):
+        # list.pop removes last item from list and returns value
+        if self.size > 0:
+            return self.items.pop()
+        else:
+            return None
+
+    def peek(self):
+        return self.items[len(self.items)-1]
+
+    def size(self):
+        if self.items is None:
+            return 0
+        else:
+            return len(self.items)
 
 class Tree(object):
 
@@ -400,6 +439,8 @@ class Tree(object):
 
     def traverse(self, rootnode):
 
+        # breadth traversal, (using a list as a pseudo queue) level by level - O(n^2) ?
+
         if rootnode is None:
 
             print "no Nodes to see here - they're all gone"
@@ -415,6 +456,71 @@ class Tree(object):
                     if n.right: nextlevel.append(n.right)
                 print
                 thislevel = nextlevel
+
+    def breadth_first_search(self, node):
+
+        # Using a queue, append & pop off elements as we cycle through them O(n)
+
+        node.level = 1
+        queue = deque([node])
+        output = []
+        current_level = node.level
+
+        while len(queue)>0:
+
+            current_node = queue.popleft()
+
+            if(current_node.level > current_level):
+                output.append("\n")
+                current_level += 1
+
+            output.append(str(current_node.value))
+
+            if current_node.left != None:
+                current_node.left.level = current_level + 1
+                queue.append(current_node.left)
+
+            if current_node.right != None:
+                current_node.right.level = current_level + 1
+                queue.append(current_node.right)
+
+            print current_node.value
+
+        #print ' '.join(output)
+
+    def pre_order_stack(self, node):
+
+        # Using a stack, append & pop elements as we cycle through them O(n)
+        # should return pre-order
+
+        node.level = 1
+        stack = Stack()
+        stack.push(node)
+        output = []
+        current_level = node.level
+
+        while stack.size() > 0:
+
+            current_node = stack.pop()
+            #print "current_node:{}".format(current_node.value)
+
+            if(current_node.level > current_level):
+                output.append("\n")
+                current_level += 1
+
+            output.append(str(current_node.value))
+
+            if current_node.right != None:
+                current_node.right.level = current_level + 1
+                stack.push(current_node.right)
+
+            if current_node.left != None:
+                current_node.left.level = current_level + 1
+                stack.push(current_node.left)
+
+            print current_node.value
+
+        #print ' '.join(output)
 
     def inOrder(self):
         self.root.inOrder()
@@ -606,6 +712,38 @@ def test_postorder_traversal():
     tr.insert(97)
     tr.postOrder()
 
+def test_breadth_first_search():
+    print "breadth first search..."
+    tr = Tree()
+    tr.insert(100)  # root
+    tr.insert(102)  # rights
+    tr.insert(103)
+    tr.insert(70)   # lefts
+    tr.insert(65)
+    tr.insert(85)
+    tr.insert(84)
+    tr.insert(95)
+    tr.insert(64)
+    tr.insert(93)
+    tr.insert(97)
+    tr.breadth_first_search(tr.root)
+
+def test_pre_order_stack():
+    print "pre order stack traversal..."
+    tr = Tree()
+    tr.insert(100)  # root
+    tr.insert(102)  # rights
+    tr.insert(103)
+    tr.insert(70)   # lefts
+    tr.insert(65)
+    tr.insert(85)
+    tr.insert(84)
+    tr.insert(95)
+    tr.insert(64)
+    tr.insert(93)
+    tr.insert(97)
+    tr.pre_order_stack(tr.root)
+
 def test_min_and_max():
     tr = Tree()
     tr.insert(100)
@@ -628,8 +766,10 @@ def test_min_and_max():
 #test_remove_node_with_right_and_left_leaf()
 #test_remove_node_with_right_and_left_leaf_no_left_min()
 
-test_inorder_traversal()
-test_preorder_traversal()
-test_postorder_traversal()
+#test_inorder_traversal()
+#test_preorder_traversal()
+#test_postorder_traversal()
+test_breadth_first_search()
+test_pre_order_stack()
 
 #test_min_and_max()
