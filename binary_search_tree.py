@@ -141,6 +141,7 @@ class Stack(object):
 
     # Stack class - abstract data type; an abstract data type with physical structure
     # Break it down: a list with methods that act like a stack
+    # LIFO - Last In, First Out
 
     def __init__(self):
         self.items = []
@@ -149,10 +150,11 @@ class Stack(object):
         return self.items == []
 
     def push(self, item):
+        # list.append adds item to front of list (top of stack - last in)
         self.items.append(item)
 
     def pop(self):
-        # list.pop removes last item from list and returns value
+        # list.pop removes last item from list and returns value (top of stack - first out)
         if self.size > 0:
             return self.items.pop()
         else:
