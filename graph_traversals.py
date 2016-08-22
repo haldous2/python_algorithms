@@ -86,7 +86,7 @@ def dfs_paths(graph, node, target, path = None):
 
 """
  iterative breadth first search traversal
- O(V+E) time
+ O(V+E) time depending on conections to node
 """
 def bfs(graph, node):
 
@@ -108,6 +108,7 @@ print "traversal via bfs:{}".format(bfs(graph, 'A'))
 
 """
  iterative breadth first search traversal return paths
+ O(V+E) time depending on connections to start
 """
 def bfs_paths(graph, start, target):
 
@@ -125,6 +126,7 @@ def bfs_paths(graph, start, target):
             visited.append(node)
 
         if node == target:
+            #print "visited:{}".format(visited)
             return current
 
         #for c in [x for x in graph[node] if x not in visited]:
@@ -136,3 +138,33 @@ def bfs_paths(graph, start, target):
     return paths
 
 print "shortest path via bfs:{}".format(bfs_paths(graph, 'A', 'E'))
+
+def bfs_paths_all(graph, start, target):
+
+    visited = []
+    paths = []
+    queue = [start]
+
+    while len(queue) > 0:
+
+        # current is a path (list)
+        current = queue.pop(0) # First In First Out, queued (entire path)
+        # last element of current path
+        node = current[-1]
+
+        if node == target:
+            paths.append(current)
+        else:
+            # not tracking end so we can find all paths
+            if node not in visited:
+                visited.append(node)
+
+        for c in [x for x in graph[node] if x not in visited and x not in current]:
+        #for c in graph[node]:
+            new_path = list(current)
+            new_path.append(c)
+            queue.append(new_path)
+
+    return paths
+
+print "all paths via bfs:{}".format(bfs_paths_all(graph, 'A', 'E'))
