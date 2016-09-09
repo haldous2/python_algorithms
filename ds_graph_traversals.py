@@ -5,18 +5,14 @@ import time
 """
 Fun with data structures - graphs
 
-Building graphs with the stack data type
+Searches: BFS:Breadth First & DFS:Depth First Search
 
-Breadth First & Depth First
+Depth First using a stack or set, FIFO
+Breadth First using a queue, FILO
 
-Depth First using a stack or set
-stack:  A B D B
-output: A -> B -> D -> E -> F -> C
 """
 
-# Graph data
-# Note: using a set the order of children will be unreliable
-#       that shouldn't matter much for dfs
+# Graph - Adjacency List
 graph = {'A': ['B', 'C'],
          'B': ['A', 'D', 'E'],
          'C': ['A', 'F'],
@@ -24,7 +20,26 @@ graph = {'A': ['B', 'C'],
          'E': ['B', 'F'],
          'F': ['C', 'E']}
 
-# recursive dfs visited
+"""
+iterative dfs
+"""
+def dfs_iterative(v):
+    stack = [v]
+    visited = []
+    while len(stack) > 0:
+        print stack
+        u = stack.pop()
+        if u not in visited:
+            visited.append(u)
+        for subnode in [x for x in graph[u] if x not in visited]:
+            stack.append(subnode)
+    print "dfs_iterative visited:{}".format(visited)
+
+dfs_iterative('A')
+
+"""
+ recursive dfs
+"""
 def dfs_visited(graph, node, visited = None):
 
     if visited is None:
@@ -45,14 +60,16 @@ def dfs_visited(graph, node, visited = None):
     # return list of visited nodes - should be all in dfs order
     return visited
 
-# print "dfs_visited"
+print "dfs_visited"
 # timeS = time.time()
-# print dfs_visited(graph, 'A', None)
+print dfs_visited(graph, 'A', None)
 # timeE = time.time()
 # timeT = timeE - timeS
 # print "time to run: {:.15f} micro seconds".format(timeT)
 
-# recursive dfs paths - not shortest first, bfs is best for that
+"""
+ recursive dfs paths - not shortest first, bfs is best for that
+"""
 def dfs_paths(graph, node, target, path = None):
 
     if path is None:
@@ -85,26 +102,26 @@ def dfs_paths(graph, node, target, path = None):
 # print "time to run: {:.15f} micro seconds".format(timeT)
 
 """
- iterative breadth first search traversal
- O(V+E) time depending on conections to node
+iterative breadth first search traversal
+O(V+E) time depending on conections to node
 """
-def bfs(graph, node):
-
+def bfs_iterative(v, s = None):
+    queue = [v]
     visited = []
-    queue = [node]
-
     while len(queue) > 0:
+        print queue
+        u = queue.pop(0)
+        if u not in visited:
+            visited.append(u)
+        if s is not None and s == u:
+            print "found {}!".format(s)
+            break
+        #for subnode in [x for x in sorted(graph[u],reverse=True) if x not in visited]:
+        for subnode in [x for x in graph[u] if x not in visited]:
+            queue.append(subnode)
+    print "bfs_iterative visited:{}".format(visited)
 
-        current = queue.pop(0) # First In First Out, queued
-        if current not in visited:
-            visited.append(current)
-
-        for c in [x for x in graph[current] if x not in visited and x not in queue]:
-            queue.append(c)
-
-    return visited
-
-print "traversal via bfs:{}".format(bfs(graph, 'A'))
+bfs_iterative('A','C')
 
 """
  iterative breadth first search traversal return paths
@@ -137,7 +154,7 @@ def bfs_paths(graph, start, target):
 
     return paths
 
-print "shortest path via bfs:{}".format(bfs_paths(graph, 'A', 'E'))
+#print "shortest path via bfs:{}".format(bfs_paths(graph, 'A', 'E'))
 
 def bfs_paths_all(graph, start, target):
 
@@ -167,4 +184,4 @@ def bfs_paths_all(graph, start, target):
 
     return paths
 
-print "all paths via bfs:{}".format(bfs_paths_all(graph, 'A', 'E'))
+#print "all paths via bfs:{}".format(bfs_paths_all(graph, 'A', 'E'))
