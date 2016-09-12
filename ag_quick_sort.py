@@ -27,45 +27,6 @@ print "Content-Type: text/html\n\n"
 """
 
 """
- qs partition - iterative
-"""
-def partition_iterative(arr,low,high):
-
-    leftPointer = self.left
-    rightPointer = self.right
-
-    while True:
-
-        print "leftPointer:%s rightPointer%s" % (leftPointer, rightPointer)
-
-        ## 5. while value at left(pointer) is less than pivot move right
-        while self.data[leftPointer] < self.pivot:
-            print "leftPointer - %s < %s" % (self.data[leftPointer], self.pivot)
-            leftPointer += 1
-
-        ## 6. while value at right(pointer) is greater than pivot move left
-        while self.data[rightPointer] > self.pivot:
-            print "rightPointer - %s > %s" % (self.data[rightPointer], self.pivot)
-            rightPointer -= 1
-
-        # 7. if both 5 and 6 does not match swap left and right
-        # 8. if left >= right, the point where they met is new pivot
-        #if (leftPointer <= rightPointer):
-        if leftPointer > rightPointer:
-            break
-        else:
-            self.swap(leftPointer, rightPointer)
-            leftPointer += 1
-            rightPointer -= 1
-
-        #if leftPointer < rightPointer:
-        #    self.swap(leftPointer, rightPointer)
-        #leftPointer += 1
-        #rightPointer -= 1
-
-    print 'data:%s' % self.data
-
-"""
  qs partition - recursive
 """
 def partition(arr,low,high):
