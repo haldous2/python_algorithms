@@ -31,7 +31,7 @@ class binarySearch(object):
 
     def search_iterative(self, find):
         min = 0
-        max = len(self.data)
+        max = len(self.data) - 1
         while min <= max:
             mid = (min + max) / 2
             if self.data[mid] == find:
@@ -50,10 +50,10 @@ class binarySearch(object):
         return self.search_recursive_worker(min, max)
 
     def search_recursive_worker(self, min, max):
-        # base case
+        # base case min <= max
         if min > max:
             return
-        # recurse
+        # recurse - narrow down
         mid = (min + max) / 2
         if self.data[mid] == self.value:
             return True
@@ -69,9 +69,10 @@ class binarySearch(object):
 
 lstTest = [0,2,5,7,9,13,27,30,33,35,38,39,41,45,47,48,49,53,55]
 lstTest = [0,2,100]
-lstTest = range(99)
+lstTest = range(42)
+
+print lstTest
 
 bs = binarySearch(lstTest)
 print "Result find iterative 32:{}".format(bs.search_iterative(32))
 print "Result find recursive 32:{}".format(bs.search_recursive(32))
-#print bs.initSearch(35)
