@@ -4,6 +4,7 @@
 #import cgitb
 #cgitb.enable()
 
+import sys
 import random
 import resource
 from collections import deque
@@ -28,14 +29,9 @@ Deleting: 3 scenarios will decide how element is removed
          .. start in right node, iterate through lefts until end (a leaf)
          .. which should be the lowest on the right
 
-Traversals (for traversing):
-Questions unanswered - are traversals used for finding, inserting and removing too ?
-                       or just to display the nodes in said order(s)
+Search: follow nodes down by layout rules smaller nodes on the left, larger on the right
 
-Breadth First Search (width, by level horizontally)
-
-Depth First Search (depth, dig down vertically)
-  Note: left then right - root moves according to order
+Traversal:
 
      Preorder
       Root, left, right
@@ -45,6 +41,10 @@ Depth First Search (depth, dig down vertically)
 
      Postorder
       left, right, root
+
+Note: Tree vs min or max Heap
+      Tree is ordered and best for searching @ O(logN) time. Insert time O(logN)
+      A Heap is best for finding the min and max value @ O(1)time. Insert time O(logN)
 
 """
 
@@ -81,15 +81,15 @@ class Node(object):
                 self.right = Node(data)
                 return True
 
-    def find(self, data):
+    def findNode(self, data):
         # return Node if found
         #        False if not
         if self.value == data:
-            return True
+            return self
         elif data < self.value:
             if self.left:
                 # search the left node recursively
-                return self.left.find(data)
+                return self.left.findNode(data)
             else:
                 # no more nodes to search
                 # didn't find the data
@@ -97,11 +97,11 @@ class Node(object):
         else:
             if self.right:
                 # search the right node recursively
-                return self.right.find(data)
+                return self.right.findNode(data)
             else:
                 # no more nodes to search
                 # didn't find the data
-                return False
+                return None
 
     def findMin(self):
         if self.left:
@@ -109,15 +109,6 @@ class Node(object):
         else:
             # return root value if no left or no more left nodes
             return self.value
-
-    def inOrder(self):
-        # in order: left, root, right
-        if self:
-            if self.left:
-                self.left.inOrder()
-            print (str(self.value))
-            if self.right:
-                self.right.inOrder()
 
     def preOrder(self):
         # pre order: root, left, right
@@ -128,6 +119,15 @@ class Node(object):
             if self.right:
                 self.right.preOrder()
 
+    def inOrder(self):
+        # in order: left, root, right
+        if self:
+            if self.left:
+                self.left.inOrder()
+            print (str(self.value))
+            if self.right:
+                self.right.inOrder()
+
     def postOrder(self):
         # post order: left, right, root
         if self:
@@ -136,38 +136,6 @@ class Node(object):
             if self.right:
                 self.right.postOrder()
             print (str(self.value))
-
-class Stack(object):
-
-    # Stack class - abstract data type; an abstract data type with physical structure
-    # Break it down: a list with methods that act like a stack
-    # LIFO - Last In, First Out
-
-    def __init__(self):
-        self.items = []
-
-    def isEmpty(self):
-        return self.items == []
-
-    def push(self, item):
-        # list.append adds item to front of list (top of stack - last in)
-        self.items.append(item)
-
-    def pop(self):
-        # list.pop removes last item from list and returns value (top of stack - first out)
-        if self.size > 0:
-            return self.items.pop()
-        else:
-            return None
-
-    def peek(self):
-        return self.items[len(self.items)-1]
-
-    def size(self):
-        if self.items is None:
-            return 0
-        else:
-            return len(self.items)
 
 class Tree(object):
 
@@ -318,9 +286,49 @@ class Tree(object):
 
         print "*****************************"
 
+    # Delete node by rules of BST - recursively
+    def rDelete(self, data):
+        self.rDelete_util(self.root, data)
+
+    def rDelete_util(self, node, data):
+        print "Deleting:{}".format(data)
+        if node is None:
+            return node
+        elif data < node.value:
+            # go left and left links reordered in this step
+            node.left = self.rDelete_util(node.left, data)
+        elif data > node.value:
+            # go right and right links reordered in this step
+            node.right = self.rDelete_util(node.right, data)
+        else:
+            if node.left is None and node.right is None:
+                # no children
+                node = None
+            elif node.left is None:
+                # only right child
+                node = node.right
+            elif node.right is None:
+                # only left child
+                node = node.left
+            else:
+                # has right and left children
+                min = self.findMin(node.right)
+                node.value = min.value
+                print "setting {}={}".format(node.value, min.value)
+                print "delete {}".format(min.value)
+                # remove and reorder right link
+                node.right = self.rDelete_util(node.right, min.value)
+
+        if node is None:
+            print "returning node:None"
+        else:
+            print "returning node:{}".format(node.value)
+        return node
+
+    # Delete node iteratively - this is a mess!
     def delete(self, data):
 
-        # Not the root, apply regular rules
+        # Note the root, apply regular rules
         # Keep track of parent in case we need to reattach
         # if has parent, then isn't the root - otherwise ... root!
         parent = self.root
@@ -333,7 +341,7 @@ class Tree(object):
                 node = current
                 break
 
-            # the parent, little left or right couldn't exist without the parent
+            # the parent, left or right couldn't exist without the parent
             parent = current
 
             # let's find that data, gather up all that data
@@ -405,6 +413,7 @@ class Tree(object):
                     else:
                         parent.right = node.right
             else:
+                # Leaf node - remove links
                 if parent is None:
                     self.root = None
                 else:
@@ -416,18 +425,55 @@ class Tree(object):
         else:
             return False
 
-    def find(self, data):
+    def successorInOrder(self, data):
+        node = self.findNode(data)
+        if node is None:
+            return None
+        if node.right is not None:
+            # return minimum from right - dunzo
+            return self.findMin(node.right)
+        else:
+            # no right leg, gotta look for the ancesor
+            # connected to left leg in O(h) time
+            current = self.root
+            successor = None
+            while current is not node:
+                if node.value < current.value:
+                    # looking left - this is an ancestor
+                    successor = current
+                    current = current.left
+                else:
+                    # looking right
+                    current = current.right
+            return successor
+
+    def predecessorInOrder(self, data):
+        node = self.findNode(data)
+        if node is None:
+            return None
+        if node.left is not None:
+            return node.left
+        else:
+            return None
+
+    def findNode(self, data):
         if self.root:
-            return self.root.find(data)
+            return self.root.findNode(data)
         else:
             return False
 
-    def findMin(self):
-        # find recursively in node
-        if self.root:
-            return self.root.findMin()
+    def findMin(self, node):
+        # find iteratively in node
+        if node:
+            current = node
+        elif self.root:
+            current = self.root
         else:
             return False
+
+        while current.left is not None:
+            current = current.left
+        return current
 
     def findMax(self):
         # find iteratively in node
@@ -439,9 +485,27 @@ class Tree(object):
         else:
             return False
 
-    def traverse(self, rootnode):
+    def isBST(self, node, min=-sys.maxint - 1, max=sys.maxint):
+        """
+         Setting ranges of min and max - lookup time is O(n)
 
-        # breadth traversal, (using a list as a pseudo queue) level by level - O(n^2) ?
+             -inf to inf [100]
+                         /  \
+          -inf to 100 [98]  [101] 100 to inf
+                      /  \
+        -inf to 98 [97]  [99] 98 to 100
+        """
+        if node is None:
+            return True
+        if (node.value > min and
+            node.value < max and
+            self.isBST(node.left, min, node.value) and
+            self.isBST(node.right, node.value, max)):
+            return True
+        else:
+            return False
+
+    def traverse(self, rootnode):
 
         if rootnode is None:
 
@@ -459,73 +523,11 @@ class Tree(object):
                 print
                 thislevel = nextlevel
 
-    def breadth_first_search(self, node):
-
-        # Using a queue, append & pop off elements as we cycle through them O(n)
-
-        node.level = 1
-        queue = deque([node])
-        output = []
-        current_level = node.level
-
-        while len(queue)>0:
-
-            current_node = queue.popleft()
-
-            if(current_node.level > current_level):
-                output.append("\n")
-                current_level += 1
-
-            output.append(str(current_node.value))
-
-            if current_node.left != None:
-                current_node.left.level = current_level + 1
-                queue.append(current_node.left)
-
-            if current_node.right != None:
-                current_node.right.level = current_level + 1
-                queue.append(current_node.right)
-
-            print current_node.value
-
-        #print ' '.join(output)
-
-    def pre_order_stack(self, node):
-
-        # Using a stack, append & pop elements as we cycle through them O(n)
-        # should return pre-order
-
-        node.level = 1
-        stack = Stack()
-        stack.push(node)
-        output = []
-        current_level = node.level
-
-        while stack.size() > 0:
-
-            current_node = stack.pop()
-            #print "current_node:{}".format(current_node.value)
-
-            if(current_node.level > current_level):
-                output.append("\n")
-                current_level += 1
-
-            output.append(str(current_node.value))
-
-            if current_node.right != None:
-                current_node.right.level = current_level + 1
-                stack.push(current_node.right)
-
-            if current_node.left != None:
-                current_node.left.level = current_level + 1
-                stack.push(current_node.left)
-
-            print current_node.value
-
-        #print ' '.join(output)
-
-    def inOrder(self):
-        self.root.inOrder()
+    def inOrder(self, node=None):
+        if node is None:
+            self.root.inOrder()
+        else:
+            node.inOrder()
 
     def preOrder(self):
         self.root.preOrder()
@@ -664,7 +666,47 @@ def test_remove_node_with_right_and_left_leaf_no_left_min():
     tr.insert(64)
     #tr.insert(93)  # removed 93 to test if min starts in right leg (min should be 95)
     tr.insert(97)
-    tr.test(85)
+    #tr.test(85)
+    tr.rDelete(64)
+    tr.inOrder()
+
+def test_successor_inorder():
+    tr = Tree()
+    tr.insert(100)  # root
+    tr.insert(102)  # rights
+    tr.insert(103)
+    tr.insert(70)   # lefts
+    tr.insert(65)
+    tr.insert(85)
+    tr.insert(84)
+    tr.insert(95)
+    tr.insert(64)
+    tr.insert(93)
+    tr.insert(97)
+    SIO = tr.successorInOrder(84)
+    if SIO is None:
+        print "SIO:None"
+    else:
+        print "SIO:{}".format(SIO.value)
+
+def test_predecessor_inorder():
+    tr = Tree()
+    tr.insert(100)  # root
+    tr.insert(102)  # rights
+    tr.insert(103)
+    tr.insert(70)   # lefts
+    tr.insert(65)
+    tr.insert(85)
+    tr.insert(84)
+    tr.insert(95)
+    tr.insert(64)
+    tr.insert(93)
+    tr.insert(97)
+    PIO = tr.predecessorInOrder(84)
+    if PIO is None:
+        print "PIO:None"
+    else:
+        print "PIO:{}".format(PIO.value)
 
 def test_inorder_traversal():
     print "in order traversal..."
@@ -714,8 +756,9 @@ def test_postorder_traversal():
     tr.insert(97)
     tr.postOrder()
 
-def test_breadth_first_search():
-    print "breadth first search..."
+# Test if a Binary Search Tree (BST)
+def test_is_bst():
+    print "post order traversal..."
     tr = Tree()
     tr.insert(100)  # root
     tr.insert(102)  # rights
@@ -728,23 +771,8 @@ def test_breadth_first_search():
     tr.insert(64)
     tr.insert(93)
     tr.insert(97)
-    tr.breadth_first_search(tr.root)
-
-def test_pre_order_stack():
-    print "pre order stack traversal..."
-    tr = Tree()
-    tr.insert(100)  # root
-    tr.insert(102)  # rights
-    tr.insert(103)
-    tr.insert(70)   # lefts
-    tr.insert(65)
-    tr.insert(85)
-    tr.insert(84)
-    tr.insert(95)
-    tr.insert(64)
-    tr.insert(93)
-    tr.insert(97)
-    tr.pre_order_stack(tr.root)
+    print "root.node.value:{}".format(tr.root.value)
+    print "isBST:{}".format(tr.isBST(tr.root))
 
 def test_min_and_max():
     tr = Tree()
@@ -768,10 +796,12 @@ def test_min_and_max():
 #test_remove_node_with_right_and_left_leaf()
 #test_remove_node_with_right_and_left_leaf_no_left_min()
 
+test_successor_inorder()
+test_predecessor_inorder()
 #test_inorder_traversal()
 #test_preorder_traversal()
 #test_postorder_traversal()
-test_breadth_first_search()
-test_pre_order_stack()
+
+#test_is_bst()
 
 #test_min_and_max()
