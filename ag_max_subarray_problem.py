@@ -30,19 +30,20 @@ def max_subarray(arr=[]):
     left_sum = -sys.maxint
     right_sum = -sys.maxint
 
-    # right half
+    # right half - find max
     sum = 0
     for i in range(m, len(arr)):
         sum += arr[i]
         right_sum = max(right_sum, sum)
 
-    # left half
+    # left half - find max
     # note: since range is end - 1, and since we need to go to zero end is -1 (0 + -1)
     sum = 0
     for i in range(m-1, -1, -1):
         sum += arr[i]
         left_sum = max(left_sum, sum)
 
+    # returning combined sub, sub max all the way up the chain
     ans = max(left_max_sum, right_max_sum)
     result = max(ans, left_sum + right_sum)
     print "=== result:{} ===".format(result)
