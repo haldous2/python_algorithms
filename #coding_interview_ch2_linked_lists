@@ -1,0 +1,1163 @@
+"""
+ Cracking the coding interview
+ Practice questions
+ Part 2. Linked Lists
+"""
+
+"""
+ Helper Code
+"""
+# linked list class
+class Node(object):
+    def __init__(self, data, next=None):
+        self.data = data
+        self.next = next
+
+# list length
+def list_length(node=None):
+    if not node:
+        raise ValueError('node not passed')
+    if not isinstance(node, Node):
+        raise ValueError('node type is invalid')
+    lenNode = 0
+    while node:
+        lenNode += 1
+        node = node.next
+    return lenNode
+
+# print list function
+def list_print(node=None):
+
+    if not node or type(node) is not Node:
+        print "node is invalid"
+        return
+
+    while node:
+        print node.data,
+        node = node.next
+    print
+
+"""
+ Remove duplicates in a linked list
+
+ Method:
+ 1. using a runner to check all nodes after indicated node. brute force - O(n^2) fer shur
+ 2. using a dict ( could use hash table ) to track what has already been viewed then delinking dups. optimal - O(n) yay!
+"""
+
+def list_remove_duplicates_runner(node=None):
+
+    if not node:
+        return
+
+    # store root for printing afterwards
+    root = node
+
+    print " before ---------------------------------"
+    list_print(node)
+
+    while node:
+
+        #print node.data,
+        #print "|",
+
+        prev = node
+        runner = node.next
+
+        while runner:
+
+            #print runner.data,
+
+            if runner.data == node.data:
+                prev.next = runner.next
+            else:
+                prev = runner
+
+            runner = runner.next
+
+        #print "...",
+        node = node.next
+
+    print " after ----------------------------------"
+    list_print(root)
+
+def list_remove_duplicates_tracker(node=None):
+
+    # Test: [1|]->[2|]->[3|]->[1|]->[4|None]
+
+    if not node or node is None:
+        return
+
+    # store root for printing afterwards
+    root = node
+
+    print " before ---------------------------------"
+    list_print(node)
+
+    d = {}
+    prev = None
+
+    while node is not None:
+
+        if node.data in d:
+            #if node.next is not None:
+            #    print "setting {}.next = {}".format(prev.data, node.next.data)
+            #else:
+            #    print "setting {}.next = None".format(prev.data)
+            prev.next = node.next
+        else:
+            d[node.data] = True
+            #print "setting prev = {}".format(node.data)
+            prev = node
+
+        node = node.next
+
+    print " after ----------------------------------"
+    list_print(root)
+
+
+# Tests - Removing duplicates from linked list
+
+ll = Node(1, Node(2, Node(3, Node(1, Node(4, None)))))
+#list_remove_duplicates_runner(ll)
+#list_remove_duplicates_tracker(ll)
+
+"""
+ Return Kth to last element from linked list
+ 3 ways to tackle:
+  1. run through to end to get length, run through again subracting length from k and return Time O(2n) Space O(1)
+  2. run through to k from start, then run another k links behind. when first reaches end return at second Time O(n) Space O(1)
+  3. run through recursively then backlink to where k lives and return. Time O(n) Space O(n)
+"""
+def list_return_kth_brute_force(n,k=0):
+
+    if not n:
+        return None
+
+    root = n
+
+    print " list ---------------------------------"
+    list_print(root)
+
+    # calculate length of list
+    nlen = 0
+    while n:
+        nlen += 1
+        n = n.next
+
+    # k should be between 0 and nlen
+    if k < 0 or k > nlen:
+        return None
+
+    # node return
+    # testing [1,2,3,1,4] where nlen = 5
+    # k >= 0 and k < nlen -> k range 0 to 4
+
+    n = root                # reset list
+    kth = 1                 # kth node counter
+
+    ndel = nlen - k     # node to return, kth from last
+
+    print "k:{} nlen:{} ndel:{}".format(k,nlen,ndel)
+    while n:
+
+        print "kth:{}".format(kth)
+
+        if kth == ndel:
+            return n
+
+        kth += 1
+        n = n.next
+
+def list_return_kth_runner(n,k=0):
+
+    if not n:
+        return None
+
+    if k < 0:
+        return None
+
+    root = n
+
+    print " list ---------------------------------"
+    list_print(root)
+
+    kth = 0
+    runner = root
+
+    # run through list, two pointers - one kth behind the other
+    while n:
+
+        # kth behind current
+        print "kth:{} k+1:{}".format(kth, k+1)
+        if kth >= k+1:
+            runner = runner.next
+
+        # end
+        if n.next is None:
+            if k > kth:
+                # invalid k specified
+                return None
+            else:
+                return runner
+
+        kth += 1
+        n = n.next
+
+# Note: had to wrap into a class in order to track idx counter and return node
+class list_return_kth_recurse(object):
+
+    def __init__(self, n, k):
+        self.k = k
+        self.n = n     # linked list
+        self.i = 0     # index counter
+        self.r = None  # return node
+
+    def list_return_kth_recurse(self):
+
+        if not self.n:
+            return None
+
+        if self.k < 0:
+            return None
+
+        self.list_return_kth_recurse_worker(self.n, self.k)
+        return self.n
+
+    def list_return_kth_recurse_worker(self,n,k=0):
+
+        if n:
+            self.list_return_kth_recurse_worker(n.next, k)
+
+        # if n:
+        #     print "k:{} n.data:{}".format(k, n.data)
+        # else:
+        #     print "k:{} n.data:{}".format(k, "None")
+
+        if k == self.i - 1:
+            #print "k:{} == self.i:{} returning n.data:{}".format(k, self.i, n.data)
+            self.i += 1
+            self.n = n
+
+        self.i += 1
+
+# Tests - Linked List return Kth node
+
+# Returning Kth node
+# V1 - brute force
+ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, Node(8, None))))))))
+# kth_node = 0
+# kth_node = 4
+# node = list_return_kth_brute_force(ll, kth_node)
+# if node is not None:
+#     print "node.data @ {} from end is {}".format(kth_node, node.data)
+# else:
+#     print "node.data @ {} from end is Error".format(kth_node)
+
+# V2 - runner
+ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, Node(8, None))))))))
+# kth_node = 2
+# node = list_return_kth_runner(ll, kth_node)
+# if node is not None:
+#     print "node.data @ {} from end is {}".format(kth_node, node.data)
+# else:
+#     print "node.data @ {} from end is Error".format(kth_node)
+
+# V3 - recursive stack
+ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, Node(8, None))))))))
+# kth_node = 2
+# list_return = list_return_kth_recurse(ll, kth_node)
+# node = list_return.list_return_kth_recurse()
+# if node is not None:
+#     print "node.data @ {} from end is {}".format(kth_node, node.data)
+# else:
+#     print "node.data @ {} from end is Error".format(kth_node)
+
+
+"""
+ Remove middle element from list if not first or last element (n>2?)
+
+"""
+def list_remove_middle(n):
+
+    if not n:
+        return
+
+    root = n
+
+    print " before ---------------------------------"
+    list_print(root)
+
+    nlen = 0
+    while n:
+        nlen += 1
+        n = n.next
+
+    # in order to keep from removing first or last, must be at least 3 in length
+    if nlen <= 2:
+        return
+
+    mid = nlen / 2
+    #print "mid:{} nlen:{}".format(mid, nlen)
+
+    n = root
+    idx = 0
+    prev = None
+    while n:
+        if idx == mid:
+            if prev:
+                prev.next = n.next
+            else:
+                # This should not happen with above checks
+                # Just in case!
+                print "broke it!!!"
+                return None
+            break
+        prev = n
+        idx += 1
+        n = n.next
+
+    print " after ---------------------------------"
+    list_print(root)
+
+def list_remove_node(n):
+
+    # remove node without passing in root
+    # not returning anything, just updating list
+    if not n:
+        return
+
+    # e.g, removing node '2'
+    # [2|]->[3|]->[4|None] OR [2|]->[3|None] OR [2|None]
+    if n.next:
+        n.data = n.next.data
+        n.next = n.next.next
+    else:
+        # Cannot delete node this way unfortunately
+        # would have to find prev and reset pointers
+        pass
+
+
+def list_remove_node_query(n, r):
+    # n:node, r:remove
+    if not n:
+        return
+    while n:
+        if n.data == r:
+            return n
+        n = n.next
+
+# Tests - Removing middle(ish) node
+
+ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, Node(8, None))))))))
+#ll = Node(1, Node(2, Node(3, None)))
+#ll = Node(1, Node(2, None))
+#list_remove_middle(ll)
+
+# Removing specified node
+ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, Node(8, None))))))))
+ll = Node(1, Node(2, Node(3, None)))
+# print " before --------------------------------"
+# list_print(ll)
+# list_remove_node(list_remove_node_query(ll,2))
+# print " after ---------------------------------"
+# list_print(ll)
+
+"""
+ Partition list by arbitrary value (may or may not be in list)
+ Note: everything less than to left, greater than or equal to the right
+       the explaination in the book is confusing
+"""
+
+def list_partition(root, partition):
+
+    """
+    Moving nodes around
+    Creates two nodes heads and tails from main node
+    Afterthought: just moving values around might be simpler and take less space
+    Data: 8,7,3,4,5,6,2,1
+    """
+
+    if not root or not partition:
+        return None
+
+    head = None
+    head_curr = None
+    tail = None
+    tail_next = None
+
+    curr = root
+
+    while curr:
+
+        if curr.data < partition:
+
+            if head_curr:
+                head_curr.next = Node(curr.data)
+                head_curr = head_curr.next
+            else:
+                head_curr = Node(curr.data)
+                head = head_curr
+
+        else:
+
+            if tail:
+                tail_next = Node(curr.data)
+                tail_next.next = tail
+                tail = tail_next
+            else:
+                tail = Node(curr.data)
+
+        curr = curr.next
+
+    if head:
+        head_curr.next = tail
+    else:
+        head = tail
+
+    print
+
+    # if head:
+    #     print head.data, head.next.data, head.next.next.data, head.next.next.next.data
+
+    # if head:
+    #     print "head"
+    #     while head:
+    #         print head.data
+    #         head = head.next
+
+    # if tail:
+    #     print "tail"
+    #     while tail:
+    #         print tail.data
+    #         tail = tail.next
+
+    return head
+
+def list_partition_swap(root, partition):
+
+    """
+     Swapping node data around
+     Data: 8,7,3,4,5,6,2,1
+    """
+
+    if not root or not partition:
+        return None
+
+    curr = root
+    wall = curr
+
+    while curr:
+
+        if curr.data < partition:
+            print "curr:",curr.data," wall:",wall.data
+            if curr.data != wall.data:
+                print "swapping {} with {}".format(wall.data, curr.data)
+                temp = wall.data
+                wall.data = curr.data
+                curr.data = temp
+            wall = wall.next
+
+        curr = curr.next
+
+# Tests - partition list
+
+# List partition
+# ll = Node(8, Node(7, Node(3, Node(4, Node(5, Node(6, Node(2, Node(1, None))))))))
+# ll = Node(1, Node(1, Node(1, Node(1, None))))
+# ll = Node(5, Node(5, Node(5, Node(5, None))))
+# print " before --------------------------------"
+# list_print(ll)
+# partition = list_partition(ll, 5)
+# print " after _--------------------------------"
+# list_print(partition)
+# list_print(ll)
+
+#List partition via swap
+# ll = Node(8, Node(7, Node(3, Node(4, Node(5, Node(6, Node(2, Node(1, None))))))))
+# #ll = Node(1, Node(1, Node(1, Node(1, None))))
+# #ll = Node(5, Node(5, Node(5, Node(5, None))))
+# print " before --------------------------------"
+# list_print(ll)
+# partition = list_partition_swap(ll, 5)
+# print " after _--------------------------------"
+# list_print(partition)
+# list_print(ll)
+
+"""
+ Add digits in a linked list
+ Forwards and backwards
+ e.g. 12 + 30 = 42
+      [2|]->[1|N] + [0|]->[3|] = [2|]->[4|N]
+  Note: lists are reversed in order to keep ones, tens, thousands etc. aligned
+  In order to add lists in order, run recursive - add zeros to lists that are shorter and add down stack
+"""
+
+def list_add_digits_worker(h1, h2):
+
+    """
+     for adding digits in a list that are in reverse order
+     e.g. [2|]->[1|N] + [0|]->[3|N] = [2|]->[4|N]
+     Note: lists do not need to be same length since ones, tens etc. line up in reverse order
+    """
+
+    if not h1 or not h2:
+        return None
+
+    sum = 0
+    lsum = None
+    rsum = None
+    rem = 0
+    carry = 0
+
+    while True:
+
+        if h1:
+            addH1 = h1.data
+        else:
+            addH1 = 0
+
+        if h2:
+            addH2 = h2.data
+        else:
+            addH2 = 0
+
+        rem = ((addH1 + addH2 + carry)/10) % 10
+        if rem:
+            sum = rem
+            carry = (addH1 + addH2 + carry) / 10
+        else:
+            sum = addH1 + addH2 + carry
+            carry = 0
+
+        #print "h1:{} h2:{} carry:{} rem:{}".format(addH1, addH2, carry, rem)
+
+        if lsum:
+            #print "setting lsum.next = ",sum
+            lsum.next = Node(sum)
+            lsum = lsum.next
+        else:
+            #print "setting lsum = ",sum
+            lsum = Node(sum)    # list sum - use this to keep track of digits
+            rsum = lsum         # pointer to front of list - returning this as sum
+
+        #h1 = h1.next
+        if h1:
+            h1 = h1.next
+        else:
+            h1 = None
+
+        if h2:
+            h2 = h2.next
+        else:
+            h2 = None
+
+        if not h1 and not h2:
+            # last carry - anything left over
+            if carry:
+                #print "setting lsum.next = ",carry
+                lsum.next = Node(carry)
+            break
+
+    return rsum
+
+# Tests
+
+# sum 12 + 30 = 42
+l1 = Node(2, Node(1, None))
+l2 = Node(0, Node(3, None))
+# sum 99 + 99 = 198
+l1 = Node(9, Node(9, None))
+l2 = Node(9, Node(9, None))
+# sum 0 + 0 = 00
+l1 = Node(0, Node(0, None))
+l2 = Node(0, Node(0, None))
+# sum 120 + 90 = 210
+l1 = Node(0, Node(9, None))
+l2 = Node(0, Node(2, Node(1, None)))
+# sum 0 + 90 = 90
+l1 = Node(0, Node(9, None))
+l2 = Node(0, None)
+lsum = list_add_digits_worker(l1, l2)
+print " sum -----------------------------------"
+#list_print(lsum)
+
+def list_add_digits_recurse(h1, h2):
+
+    """
+     for adding digits in a list that are in order
+     e.g. [1|]->[2|N] + [3|]->[0|N] = [4|]->[2|N]
+     Note: lists must be same length, add zeros to lengthen
+    """
+
+    global carry
+    carry = 0   # internal carry integer
+    global sum
+    sum = None  # internal sum list
+    global rsum
+    rsum = None # return sum list head
+
+    def add_worker(h1, h2):
+
+        global carry
+        global sum
+        global rsum
+
+        if h1 is None:
+            return
+
+        # assume recurse init was called and lists are the same length
+        add_worker(h1.next, h2.next)
+
+        rem = ((h1.data + h2.data + carry)/10) % 10
+
+        if rem:
+            tsum = rem
+            carry = 1
+        else:
+            tsum = h1.data + h2.data + carry
+            carry = 0
+
+        print "h1:{} h2:{} rem:{} tsum:{} carry:{}".format(h1.data, h2.data, rem, tsum, carry)
+        if sum:
+            # insert new_node at head
+            new_node = Node(tsum, sum)
+            rsum = new_node
+        else:
+            sum = Node(tsum)
+            rsum = sum
+
+    def pad_zero_nodes(n):
+        new_node = None
+        ret_node = None
+        for i in range(0, n):
+            if new_node:
+                new_node.next = Node(0, None)
+                new_node = new_node.next
+            else:
+                new_node = Node(0, None)
+                ret_node = new_node
+
+        return ret_node
+
+    def len_worker(h1, h2):
+
+        if not h1 or not h2:
+            return None
+
+        # find longest of two lists
+        len_h1 = 0
+        len_h2 = 0
+        r1 = h1
+        r2 = h2
+        while h1:
+            len_h1 += 1
+            h1 = h1.next
+        while h2:
+            len_h2 += 1
+            h2 = h2.next
+
+        len_add_h1 = 0
+        len_add_h2 = 0
+        if len_h1 > len_h2:
+            len_add_h2 = len_h1 - len_h2
+            add_nodes = pad_zero_nodes(len_add_h2)
+            if add_nodes:
+                add_nodes.next = r2
+                r2 = add_nodes
+        else:
+            len_add_h1 = len_h2 - len_h1
+            add_nodes = pad_zero_nodes(len_add_h1)
+            if add_nodes:
+                add_nodes.next = r1
+                r1 = add_nodes
+
+        add_worker(r1, r2)
+
+    len_worker(h1, h2)
+
+    return rsum
+
+# Tests
+l1 = Node(1, Node(2, Node(3, Node(4, None))))
+l2 = Node(3, Node(1,None))
+#sum = list_add_digits_recurse(l1, l2)
+#list_print(sum)
+
+"""
+ Is linked list a palindrome ?
+ list [a,b,c,b,a] or [a,b,c,c,b,a]
+ front half matches back half
+
+ brute force:
+ find length of list, iterate through through first half - recurse though last half
+ if length is even, x for x match, else if odd - there will be a middle odd man out
+"""
+def list_is_palindrome(h):
+
+    """
+     h: head of list
+    """
+
+    # base case - need a list to check
+    if not h:
+        return False
+
+    # store root node for later
+    #global root
+    root = h
+
+    # we need to know how long this thing is
+    lenH = 0
+    while h:
+        lenH += 1
+        h = h.next
+
+    # midpoint
+    # note: since midpoint will be an int, should take care of even/odd
+    #       e.g., if len is 6 (even) - mid = 3
+    #             if len is 5 (odd)  - mid = 2 (( 5 / 2 = 2.5, int val = 2 [+1])) which scrubs out odd man
+    global mid
+    isOdd = lenH % 2 is not 0 # True if Odd
+    if isOdd:
+        mid = lenH / 2 + 1
+    else:
+        mid = lenH / 2
+
+    global isPalindrome
+    isPalindrome = True # assume true until false... guilty!
+
+    def reverse_compare(h, countNode=0):
+
+        global mid
+        global root
+        global isPalindrome
+
+        if h is None:
+            return
+
+        countNode += 1
+
+        reverse_compare(h.next, countNode)
+
+        print "h:{} root:{} countNode:{} mid:{}".format(h.data, root.data, countNode, mid)
+        if countNode <= mid:
+            return  # less work - stick it out till the end!
+
+        if not isPalindrome:
+            return  # return if not true - no need to do extra work .. and we're stuck in this recursion till the end!
+
+        if root.data != h.data:
+            isPalindrome = False
+
+        root = root.next
+
+    h = root
+    reverse_compare(h, 0)
+
+    return isPalindrome
+
+# Tests - List is palindrome
+ll = Node('a', Node('b', Node('b', Node('a', None))))
+# print list_is_palindrome(ll)
+
+def list_is_palindrome_stack(h):
+
+    """
+     Stack and Runner method
+     Run runner to end at 2x speed - when at end, Walker will be at middle
+     Pop stack and keep walking while comparing
+
+     e.g.
+      odd number, r ends at next.next so skip mid stack pop
+     [1,2,3,4,5]
+      *   r
+        *     r
+
+      even number, r ends at next start stack pop immediately
+     [1,2,3,4,5,6]
+      *   r
+        *     r
+          *     r
+
+     [1] = palindrome
+     [1,1] = palindrome
+
+     [1,2,1]
+      *   r
+
+    """
+
+    if not h:
+        return
+
+    root = h
+
+    # Runner
+    if h.next:
+        if h.next.next:
+            isOdd = True
+            runner = h.next.next
+        else:
+            if h.data == h.next.data:
+                # Two elements that are the same - that's a palindrome!
+                return True
+            isOdd = False
+            runner = h.next
+    else:
+        # Only one element - that's a palindrome!
+        return True
+
+    stack = []
+    compareStack = False
+    skipMiddle = False
+    isPalindrome = True
+
+    while h:
+
+        if compareStack:
+            if isOdd and not skipMiddle:
+                skipMiddle = True
+            else:
+                # do comparison
+                compare = stack.pop()
+                print "compare:{} h.data:{}".format(compare, h.data)
+                if compare != h.data:
+                    print "is NOT a palindrome!"
+                    isPalindrome = False
+                    break
+        else:
+            stack.append(h.data)
+
+        # runner
+        #if runner:
+        #    print "runner.data:",runner.data
+
+        if runner.next:
+            if runner.next.next:
+                isOdd = True
+                runner = runner.next.next
+            else:
+                isOdd = False
+                runner = runner.next
+        else:
+            compareStack = True
+
+        h = h.next
+
+    print "isPalindrome:",isPalindrome
+    return isPalindrome
+
+# Tests - list is palindrome using a stack
+ll = Node('a', Node('b', Node('x', Node('c', Node('b', Node('a', None))))))
+ll = Node('a', Node('b', Node('a', None)))
+ll = Node('a', None)
+ll = Node('a', Node('b', None))
+#print list_is_palindrome_stack(ll)
+
+"""
+ Linked list intersection
+ Find merge points of two linked lists
+
+ Methods:
+ 1. Brute Force - compare one by one in a list to all values of other list - bad, O(mn)
+ 2. External Storage - track using dict or hash table and compare other list to storage - optimal in python, O(m+n)
+ 3. Calculate lengths then track though where ends are same length - optimal, O(m+n)
+
+ Important: Assuming the lists merge into a Y shape - mergepoint 1
+            Also note that tail end will be the same node - tail end 3
+
+ e.g.   [4|]
+            [5|]
+                [6|]
+                    [1|]->[2|]->[3|N]
+                [9|]
+            [8|]
+        [7|]
+
+"""
+
+def list_intersection_node_end(l):
+
+    if not l:
+        raise ValueError('node not passed')
+    if not isinstance(l, Node):
+        raise ValueError('invalid node passed')
+
+    while l:
+        if not l.next:
+            return l
+        l = l.next
+
+# 1. brute force, O(m*n)
+def list_intersection_brute_force(l1, l2):
+
+    if not l1 or not l2:
+        raise ValueError('node(s) not passed')
+    if not isinstance(l1, Node) or not isinstance(l2, Node):
+        raise ValueError('invalid node(s) passed')
+
+    tailL1 = list_intersection_node_end(l1)
+    tailL2 = list_intersection_node_end(l2)
+    if tailL1 != tailL2:
+        return None
+
+    rootL1 = l1
+    rootL2 = l2
+
+    # start walking first list
+    while l1:
+        l2 = rootL2
+        # walk the second list looking for merged nodes
+        while l2:
+            if l1 == l2:
+                return l1
+            l2 = l2.next
+        l1 = l1.next
+
+    return None
+
+# 2. using storage (dict or hash table) - then traverse one of the lists, O(m+n)
+def list_intersection_dict(l1, l2):
+
+    if not l1 or not l2:
+        raise ValueError('node(s) not passed')
+    if not isinstance(l1, Node) or not isinstance(l2, Node):
+        raise ValueError('invalid node(s) passed')
+
+    tailL1 = list_intersection_node_end(l1)
+    tailL2 = list_intersection_node_end(l2)
+    if tailL1 != tailL2:
+        return None
+
+    # Store a list in a dict
+    store = {}
+    while l1:
+        store[l1] = True
+        l1 = l1.next
+
+    # comparison to store
+    while l2:
+        if l2 in store:
+            return l2
+        l2 = l2.next
+
+    return None
+
+# 3. start at same point in list (lengths calculated), O(m+n)
+#    Note: this algorithm will verify the tail of list is same length
+def list_intersection_race(l1, l2):
+
+    if not l1 or not l2:
+        raise ValueError('node(s) not passed')
+    if not isinstance(l1, Node) or not isinstance(l2, Node):
+        raise ValueError('invalid node(s) passed')
+
+    tailL1 = list_intersection_node_end(l1)
+    tailL2 = list_intersection_node_end(l2)
+    if tailL1 != tailL2:
+        return None
+
+    lenL1 = list_length(l1)
+    lenL2 = list_length(l2)
+
+    # race l1 and l2 node for node
+    # start with longer list (swap so l1 larger)
+    # start race when l1 and l2 are same length
+    if lenL2 > lenL1:
+        #swap lengths
+        temp = lenL1
+        lenL1 = lenL2
+        lenL2 = temp
+        # swap lists
+        temp = l1
+        l1 = l2
+        l2 = temp
+
+    # race!
+    # lenL1 = 5, lenL2 = 4
+    count = 0
+    while l1:
+        # lenL1 = lenL2 ... count 0 - run right away
+        #print "count:{} lenL1:{} lenL2:{} l1.data:{} l2.data:{}".format(count, lenL1, lenL2, l1.data, l2.data)
+        if count >= (lenL1 - lenL2):
+            if l1 == l2:
+                return l1
+            l2 = l2.next
+        count += 1
+        l1 = l1.next
+
+    return None
+
+def list_intersection_test(node):
+    if not node:
+        #raise ValueError('node not passed')
+        print "Node of intersection:None"
+        return
+    if not isinstance(node, Node):
+        #raise ValueError('invalid node passed')
+        print "Node of intersection:Invalid"
+        return
+    # test by displaying node value
+    print "Node of intersection:",node.data
+
+# Tests - Linked list intersections
+li = Node(1, Node(2, Node(3, None))) # intersecting nodes
+l1 = Node(1, Node(2, li))
+l2 = Node(4, Node(5, Node(2, Node(3, li))))
+
+#list_intersection_test(list_intersection_brute_force(l1, l2))
+#list_intersection_test(list_intersection_dict(l1, l2))
+#list_intersection_test(list_intersection_race(l1, l2))
+
+"""
+ Linked List - Loop checker - find node where loop starts
+
+ Methods:
+  1. Runner - one slow and one fast pointer 2x (Floyds Cycle) - time complexity O(n)
+  2.
+
+ example:
+  [1|]->[2|]->[3|]->[4|]
+          |           |
+        [7|]->[6|]->[5|]
+
+"""
+
+def list_loop_detector_runner(l):
+
+    if not l:
+        raise ValueError('node not passed')
+    if not isinstance(l, Node):
+        raise ValueError('invalid node passed')
+
+    root = l
+    r = l
+
+    while l:
+
+        # walk
+        l = l.next
+
+        # run!
+        if r and r.next:
+            r = r.next.next
+        else:
+            # if it was a loop, next.next would have worked
+            # not a loop!
+            return False
+
+        # compare
+        if r:
+            print "compare {} to {}".format(l.data, r.data)
+        else:
+            print "compare {} to {}".format(l.data, "None")
+        if l == r:
+
+            # found the loop - return here or keep going to find start of loop
+            #return True
+
+            # find loop start
+            # move l to start - keep r where it's at and move 1 space at a time
+            l = root
+            while l:
+
+                l = l.next
+                r = r.next
+
+                if l == r:
+                    print "l == r - loop start @ {}", l.data
+                    return l
+
+    return False
+
+def list_loop_detection_tracker(l):
+
+    if not l:
+        raise ValueError('node not passed')
+    if not isinstance(l, Node):
+        raise ValueError('invalid node passed')
+
+    store = {}
+
+    while l:
+        if l in store:
+            return True
+        store[l] = True
+        l = l.next
+
+    return False
+
+def list_loop_remover(l):
+
+    print "removing list loop..."
+
+    if not l:
+        raise ValueError('node not passed')
+    if not isinstance(l, Node):
+        raise ValueError('invalid node passed')
+
+    store = {}
+    prev = None
+
+    while l:
+        if l in store:
+            # found a duplicate - unlink next
+            print "loop started @ node {}".format(l.data)
+            print "removed - node({}).next = None".format(prev.data)
+            prev.next = None
+            return
+        store[l] = True
+        prev = l
+        l = l.next
+
+def list_loop_length(l, loopDetected=False):
+
+    """
+     Count loop length
+     Assuming list is a loop**
+     if loopDetected is True, passing in node that is already in a loop
+     else run through list to find first match then again to get count
+    """
+    pass
+
+# Tests - linked list loop checker
+# (1,2,3,4,5,6,7)
+#    |---------|
+
+node2 = Node(2,None)
+node7 = Node(7,None)
+ll = node7
+node7.next = node2
+ll = Node(6, ll)
+ll = Node(5, ll)
+ll = Node(4, ll)
+ll = Node(3, ll)
+node2.next = ll
+ll = node2
+ll = Node(1, ll)
+
+# (1,2,3,4,5,6)
+#      |-----|
+node3 = Node(3,None)
+node6 = Node(6,None)
+ll = node6
+node6.next = node3
+ll = Node(5, ll)
+ll = Node(4, ll)
+node3.next = ll
+ll = node3
+ll = Node(2, ll)
+ll = Node(1, ll)
+
+#ll = Node(1, Node(2, Node(3, Node(4, Node(5, Node(6, Node(7, None)))))))
+
+# print "list loop detected:",list_loop_detector_runner(ll)
+# #print "list loop length:",list_loop_length(start)
+# list_loop_remover(ll)
+# print "list loop detected:",list_loop_detector_runner(ll)
+
+# print "list loop detected:",list_loop_detection_tracker(ll)
+# list_loop_remover(ll)
+# list_print(ll)
+# print "list loop detected:",list_loop_detection_tracker(ll)
