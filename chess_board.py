@@ -182,11 +182,15 @@ class chessBoard:
 
             for move in [moves[i] for i in moves]:
 
-                # skip adding to path when:
-                # move has already been visited
-                # move is a pawn
-                # point to move travels over a pawn spot
-                if move in self.mem_visited or move in pawns or self.move_collision(point, move, pawns) or self.move_out_of_range(start, target, move):
+                """
+                skip adding to path when:
+                 move has already been visited
+                 move is a pawn
+                 point to move travels over a pawn spot
+                """
+                #if move in self.mem_visited or move in pawns or self.move_collision(point, move, pawns) or self.move_out_of_range(start, target, move):
+                #if move in self.mem_visited or move in pawns or self.move_out_of_range(start, target, move):
+                if move in self.mem_visited or move in pawns:
                     continue
 
                 self.mem_visited[move] = True
