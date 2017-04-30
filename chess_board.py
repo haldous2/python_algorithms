@@ -154,7 +154,7 @@ class chessBoard:
 
     def chess_board(self, start, target, pawns=[]):
         """
-        basic dfs for a grid'like' structure
+        basic bfs for a grid'like' structure
         find path from start to target, this class does not allow to jump over pawns
         start = point(x,y)
         target = point(x,y) - goal
@@ -188,9 +188,12 @@ class chessBoard:
                  move is a pawn
                  point to move travels over a pawn spot
                 """
-                #if move in self.mem_visited or move in pawns or self.move_collision(point, move, pawns) or self.move_out_of_range(start, target, move):
-                #if move in self.mem_visited or move in pawns or self.move_out_of_range(start, target, move):
-                if move in self.mem_visited or move in pawns:
+                #if (move in self.mem_visited or
+                #    move in pawns or
+                #    self.move_collision(point, move, pawns) or
+                #    self.move_out_of_range(start, target, move)):
+                if (move in self.mem_visited or
+                    move in pawns):
                     continue
 
                 self.mem_visited[move] = True
