@@ -68,7 +68,7 @@ class maxHeap:
         """
         if not l:
             return
-        self.h = []
+        self.h = [-9999]
         for i in xrange(0, len(l)):
             self.push(l[i])
 
@@ -177,7 +177,7 @@ class minHeap:
         """
         if not l:
             return
-        self.h = []
+        self.h = [-9999]
         for i in xrange(0, len(l)):
             self.push(l[i])
 
