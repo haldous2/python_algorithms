@@ -44,12 +44,16 @@ class maxHeap:
         self.h = [-9999]
 
     def peek(self):
-        return self.h[1]
+        if len(self.h) > 1:
+            return self.h[1]
+        else:
+            return None
 
     def pop(self):
-        self.h[1] = self.h[-1]
-        self.h.pop()
-        self.bubble_down(1)
+        if len(self.h) > 1:
+            self.h[1] = self.h[-1]
+            self.h.pop()
+            self.bubble_down(1)
 
     def push(self, value):
         """
@@ -64,6 +68,7 @@ class maxHeap:
         """
         if not l:
             return
+        self.h = []
         for i in xrange(0, len(l)):
             self.push(l[i])
 
@@ -148,12 +153,16 @@ class minHeap:
         self.h = [-9999]
 
     def peek(self):
-        return self.h[1]
+        if len(self.h) > 1:
+            return self.h[1]
+        else:
+            return None
 
     def pop(self):
-        self.h[1] = self.h[-1]
-        self.h.pop()
-        self.bubble_down(1)
+        if len(self.h) > 1:
+            self.h[1] = self.h[-1]
+            self.h.pop()
+            self.bubble_down(1)
 
     def push(self, value):
         """
@@ -168,6 +177,7 @@ class minHeap:
         """
         if not l:
             return
+        self.h = []
         for i in xrange(0, len(l)):
             self.push(l[i])
 
