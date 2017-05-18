@@ -41,7 +41,8 @@ class maxHeap:
     """
 
     def __init__(self):
-        self.h = [-9999]
+        self.h = [None]
+        self.d = {}
 
     def peek(self):
         if len(self.h) > 1:
@@ -50,16 +51,62 @@ class maxHeap:
             return None
 
     def pop(self):
+
         if len(self.h) > 1:
-            self.h[1] = self.h[-1]
-            self.h.pop()
-            self.bubble_down(1)
+
+            if len(self.h) == 2:
+                # last (and only) element
+                # [None, 1] -> [None]
+                self.d[self.h[1]] = None
+                self.h.pop()
+
+            else:
+                # nth element
+                # [None, 1, .. n] -> [None, .. n]
+                self.h[1], self.h[len(self.h) - 1] = self.h[len(self.h) - 1], self.h[1]
+                self.d[self.h[1]] = 1
+                self.d[self.h[len(self.h) - 1]] = None
+                self.h.pop()
+                self.bubble_down(1)
+
+    def delete(self, value):
+        """
+        Delete value in heap
+        find O(1) via self.d then swap with last and bubble_down
+        Note: this is not a normal function of a heap.
+              included because of an algorithm that needed to be done
+        """
+        if len(self.h) > 1 and value:
+
+            # find value
+            if value in self.d:
+                del_idx = self.d[value]
+            else:
+                del_idx = None
+
+            # delete the thing
+            if del_idx:
+
+                if del_idx == (len(self.h) - 1):
+                    # last element
+                    # [None, 1] -> [None]
+                    self.d[self.h[del_idx]] = None
+                    self.h.pop()
+                else:
+                    # nth element
+                    # [None, 1, .. n] -> [None, .. n]
+                    self.h[del_idx], self.h[len(self.h) - 1] = self.h[len(self.h) - 1], self.h[del_idx]
+                    self.d[self.h[del_idx]] = del_idx
+                    self.d[self.h[len(self.h) - 1]] = None
+                    self.h.pop()
+                    self.bubble_down(del_idx)
 
     def push(self, value):
         """
         insert value at end of array (list)
         """
         self.h.append(value)
+        self.d[value] = len(self.h) - 1
         self.float_up(len(self.h) - 1)
 
     def heapify(self, l):
@@ -68,7 +115,7 @@ class maxHeap:
         """
         if not l:
             return
-        self.h = [-9999]
+        self.h = [None]
         for i in xrange(0, len(l)):
             self.push(l[i])
 
@@ -81,12 +128,21 @@ class maxHeap:
         i = index
         p = index // 2
 
-        while self.h[i] > self.h[p] and p > 0:
+        while True:
+
+            if self.h[i] <= self.h[p] or i == 1:
+                break
+
             self.h[p], self.h[i] = self.h[i], self.h[p]
+            self.d[self.h[i]] = i
+            self.d[self.h[p]] = p
+
             i = p
             p = i // 2
 
-    def bubble_down(self, index):
+        return i
+
+    def bubble_down(self, index=1):
 
         h_len = len(self.h) - 1
 
@@ -103,25 +159,33 @@ class maxHeap:
                     if self.h[child_left] > self.h[child_right]:
                         if self.h[child_left] > self.h[i]:
                             self.h[i], self.h[child_left] = self.h[child_left], self.h[i]
+                            self.d[self.h[i]] = i
+                            self.d[self.h[child_left]] = child_left
                             i = child_left
                         else:
-                            return
+                            break
                     else:
                         if self.h[child_right] > self.h[i]:
                             self.h[i], self.h[child_right] = self.h[child_right], self.h[i]
+                            self.d[self.h[i]] = i
+                            self.d[self.h[child_right]] = child_right
                             i = child_right
                         else:
-                            return
+                            break
                 else:
                     # only left in bounds
                     if self.h[child_left] > self.h[i]:
                         self.h[i], self.h[child_left] = self.h[child_left], self.h[i]
+                        self.d[self.h[i]] = i
+                        self.d[self.h[child_left]] = child_left
                         i = child_left
                     else:
-                        return
+                        break
             else:
                 # neither one in bounds
-                return
+                break
+
+        return i
 
 maxData = [0,40,35,38,33,31,28,22,27,5]
 maxData = [0,40,35,38,33,31,28,22,27,5]
@@ -150,7 +214,8 @@ class minHeap:
     """
 
     def __init__(self):
-        self.h = [-9999]
+        self.h = [None]
+        self.d = {}
 
     def peek(self):
         if len(self.h) > 1:
@@ -159,16 +224,62 @@ class minHeap:
             return None
 
     def pop(self):
+
         if len(self.h) > 1:
-            self.h[1] = self.h[-1]
-            self.h.pop()
-            self.bubble_down(1)
+
+            if len(self.h) == 2:
+                # last (and only) element
+                # [None, 1] -> [None]
+                self.d[self.h[1]] = None
+                self.h.pop()
+
+            else:
+                # nth element
+                # [None, 1, .. n] -> [None, .. n]
+                self.h[1], self.h[len(self.h) - 1] = self.h[len(self.h) - 1], self.h[1]
+                self.d[self.h[1]] = 1
+                self.d[self.h[len(self.h) - 1]] = None
+                self.h.pop()
+                self.bubble_down(1)
+
+    def delete(self, value):
+        """
+        Delete value in heap
+        find O(1) via self.d then swap with last and bubble_down
+        Note: this is not a normal function of a heap.
+              included because of an algorithm that needed to be done
+        """
+        if len(self.h) > 1 and value:
+
+            # find value
+            if value in self.d:
+                del_idx = self.d[value]
+            else:
+                del_idx = None
+
+            # delete the thing
+            if del_idx:
+
+                if del_idx == (len(self.h) - 1):
+                    # last element
+                    # [None, 1] -> [None]
+                    self.d[self.h[del_idx]] = None
+                    self.h.pop()
+                else:
+                    # nth element
+                    # [None, 1, .. n] -> [None, .. n]
+                    self.h[del_idx], self.h[len(self.h) - 1] = self.h[len(self.h) - 1], self.h[del_idx]
+                    self.d[self.h[del_idx]] = del_idx
+                    self.d[self.h[len(self.h) - 1]] = None
+                    self.h.pop()
+                    self.bubble_down(del_idx)
 
     def push(self, value):
         """
         insert value at end of array (list)
         """
         self.h.append(value)
+        self.d[value] = len(self.h) - 1
         self.float_up(len(self.h) - 1)
 
     def heapify(self, l):
@@ -177,7 +288,7 @@ class minHeap:
         """
         if not l:
             return
-        self.h = [-9999]
+        self.h = [None]
         for i in xrange(0, len(l)):
             self.push(l[i])
 
@@ -186,13 +297,23 @@ class minHeap:
         float value at index up while smaller than parent
         note: to keep 0th index clear, p > 0
         """
+
         i = index
         p = index // 2
 
-        while self.h[i] < self.h[p] and p > 0:
+        while True:
+
+            if self.h[i] >= self.h[p] or i == 1:
+                break
+
             self.h[p], self.h[i] = self.h[i], self.h[p]
+            self.d[self.h[i]] = i
+            self.d[self.h[p]] = p
+
             i = p
             p = i // 2
+
+        return i
 
     def bubble_down(self, index=1):
 
@@ -210,29 +331,34 @@ class minHeap:
                     # both within bounds
                     if self.h[child_left] < self.h[child_right]:
                         if self.h[child_left] < self.h[i]:
-                            #print "swap left with parent...", self.h[child_left], self.h[i]
                             self.h[i], self.h[child_left] = self.h[child_left], self.h[i]
+                            self.d[self.h[i]] = i
+                            self.d[self.h[child_left]] = child_left
                             i = child_left
                         else:
-                            return
+                            break
                     else:
                         if self.h[child_right] < self.h[i]:
-                            #print "swap right with parent...", self.h[child_right], self.h[i]
                             self.h[i], self.h[child_right] = self.h[child_right], self.h[i]
+                            self.d[self.h[i]] = i
+                            self.d[self.h[child_right]] = child_right
                             i = child_right
                         else:
-                            return
+                            break
                 else:
                     # only left in bounds
                     if self.h[child_left] < self.h[i]:
-                        #print "swap left with parent...", self.h[child_left], self.h[i]
                         self.h[i], self.h[child_left] = self.h[child_left], self.h[i]
+                        self.d[self.h[i]] = i
+                        self.d[self.h[child_left]] = child_left
                         i = child_left
                     else:
-                        return
+                        break
             else:
                 # neither one in bounds
-                return
+                break
+
+        return i
 
 minData = [0,22,28,27,33,38,40,31,35] # sorted
 #minData = [0,33,22,40,28,38,27,31,35] # scrambled eggs
